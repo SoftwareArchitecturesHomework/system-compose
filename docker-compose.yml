@@ -19,6 +19,7 @@ services:
       timeout: 5s
       retries: 5
 
+
   # --- Nuxt Full-Stack Alkalmazás ---
   app:
     # A build kontextus a szomszédos mappára mutat
@@ -26,44 +27,19 @@ services:
       context: ../core-app
       dockerfile: Dockerfile
     container_name: core-app
-    develop:
-      watch:
-        # Sync frontend code changes
-        - action: sync
-          path: ../core-app/app
-          target: /app/app
-          ignore:
-            - node_modules/
-        # Sync server-side code
-        - action: sync
-          path: ../core-app/server
-          target: /app/server
-          ignore:
-            - node_modules/
-        # Sync lib directory
-        - action: sync
-          path: ../core-app/lib
-          target: /app/lib
-          ignore:
-            - node_modules/
-        # Sync prisma schema
-        - action: rebuild
-          path: ../core-app/prisma/schema.prisma
-          target: /app/prisma/schema.prisma
-        # Sync nuxt config
-        - action: sync+restart
-          path: ../core-app/nuxt.config.ts
-          target: /app/nuxt.config.ts
-        # Rebuild on package.json changes
-        - action: rebuild
-          path: ../core-app/package.json
     ports:
       - "3000:3000"
+    volumes:
+      - ../core-app:/app
+      - node_modules_cache:/app/node_modules
+    # Környezeti változók az adatbázis eléréséhez
     environment:
       - DATABASE_URL=postgresql://user:postgrespassword@db:5432/workplanner?schema=workplanner
     depends_on:
       db:
         condition: service_healthy
+
+
 
 volumes:
   workplanner-data:
