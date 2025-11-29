@@ -1,0 +1,6 @@
+[submodule "core-app"]
+	path = core-app
+	url = https://github.com/SoftwareArchitecturesHomework/core-app.git
+[submodule "comms"]
+	path = comms
+	url = https://github.com/SoftwareArchitecturesHomework/comms.git
