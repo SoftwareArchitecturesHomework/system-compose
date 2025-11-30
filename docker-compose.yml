@@ -1,7 +1,7 @@
-version: '3.8'
+version: "3.8"
 
 services:
-  # --- Postgres Adatbázis ---
+  # --- PostgreSQL Database ---
   db:
     image: postgres:16-alpine
     container_name: postgres-db
@@ -10,36 +10,31 @@ services:
       POSTGRES_PASSWORD: postgrespassword
       POSTGRES_DB: workplanner
     ports:
-      - "5433:5432"
+      - "5432:5432"
     volumes:
       - workplanner-data:/var/lib/postgresql
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U user -d workplanner" ]
+      test: ["CMD-SHELL", "pg_isready -U user -d workplanner"]
       interval: 5s
       timeout: 5s
       retries: 5
 
-
-  # --- Nuxt Full-Stack Alkalmazás ---
+  # --- Nuxt Core Application ---
   app:
-    # A build kontextus a szomszédos mappára mutat
     build:
-      context: ../core-app
+      context: ./core-app
       dockerfile: Dockerfile
     container_name: core-app
     ports:
       - "3000:3000"
     volumes:
-      - ../core-app:/app
+      - ./core-app:/app
       - node_modules_cache:/app/node_modules
-    # Környezeti változók az adatbázis eléréséhez
     environment:
       - DATABASE_URL=postgresql://user:postgrespassword@db:5432/workplanner?schema=workplanner
     depends_on:
       db:
         condition: service_healthy
-
-
 
 volumes:
   workplanner-data:
