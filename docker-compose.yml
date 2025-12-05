@@ -16,26 +16,129 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - default
 
-  # --- Nuxt Core Application ---
-  app:
+  # --- Database Migrator ---
+  migrator:
+    # image: wingsmc/work-planner-migrator:latest
     build:
       context: ./core-app
+      target: migrator
       dockerfile: Dockerfile
-    container_name: core-app
-    ports:
-      - "3000:3000"
-    volumes:
-      - ./core-app:/app
-      - node_modules_cache:/app/node_modules
+      tags:
+        - wingsmc/work-planner-migrator:latest
+    container_name: db-migrator
     environment:
       - DATABASE_URL=postgresql://user:postgrespassword@db:5432/workplanner?schema=workplanner
+      # Set to true to seed the database with dummy data on startup
+      - SEED_DB=true
     depends_on:
       db:
         condition: service_healthy
+    networks:
+      - default
+
+  # --- Nuxt Core Application ---
+  core:
+    # image: wingsmc/work-planner-core:latest
+    build:
+      context: ./core-app
+      target: production
+      dockerfile: Dockerfile
+      tags:
+        - wingsmc/work-planner-core:latest
+    container_name: core
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://user:postgrespassword@db:5432/workplanner?schema=workplanner
+      - NUXT_AUTH_SECRET=
+      - NUXT_AUTH_URL=http://localhost:3000/api/auth
+      - NUXT_AUTH_ORIGIN=http://localhost:3000/api/auth
+      - NUXT_COMMS_API_URL=http://comms:4000
+      # Don't leak your actual private key, this is just an example
+      - NUXT_JWT_PRIVATE_KEY=-----BEGIN RSA PRIVATE KEY-----\n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\n-----END RSA PRIVATE KEY-----
+      - NUXT_GOOGLE_CLIENT_ID=
+      - NUXT_GOOGLE_CLIENT_SECRET=
+      - NUXT_DISCORD_CLIENT_ID=
+      - NUXT_DISCORD_CLIENT_SECRET=
+      - NUXT_PUBLIC_REPORT_SERVICE_URL=http://localhost:8080
+      - NUXT_PUBLIC_REPORT_SERVICE_API_KEY=eb791ef310f839e817cc0aac46f5883adea878e57f60472fba9d670ef74b2187
+
+    depends_on:
+      db:
+        condition: service_healthy
+      migrator:
+        condition: service_completed_successfully
+    networks:
+      - default
+
+  # --- Reporting Service ---
+  reporting:
+    # image: wingsmc/work-planner-reporting:latest
+    build:
+      context: ./data_analysis
+      dockerfile: Dockerfile
+      tags:
+        - wingsmc/work-planner-reporting:latest
+    container_name: reporting
+    ports:
+      - "8080:8080"
+    environment:
+      - DATABASE_URL=postgresql://user:postgrespassword@db:5432/workplanner?options=-c search_path=workplanner
+      - DIAGRAMS_PATH=generated/charts
+      - TEMPLATES=templates
+      - PDF_PATH=reports/generated/pdf_reports
+      - API_KEY=eb791ef310f839e817cc0aac46f5883adea878e57f60472fba9d670ef74b2187
+      - GRPC_HOST=0.0.0.0
+      - GRPC_PORT=8080
+      - MSYS2_DLL_PATH=/usr/lib
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # --- Communications Service ---
+  comms:
+    # image: wingsmc/work-planner-comms:latest
+    build:
+      context: ./comms
+      dockerfile: Dockerfile
+      tags:
+        - wingsmc/work-planner-comms:latest
+    container_name: comms
+    ports:
+      - "4000:4000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    environment:
+      # Generated via `mix phx.gen.secret` don't leak your actual one, this is just an example
+      - SECRET_KEY_BASE=nvFj6wx0dr+CBom46bJy8XnJYO2V6EtAIh7ZdC7C/PX198cmMY+/uT01fEbycxdB
+      - PHX_HOST=worktime.yourdomain.com
+      # Can be left empty if not using DNS-based service discovery in Kubernetes or similar
+      - DNS_CLUSTER_QUERY=
+      - JWT_PUBLIC_KEY=-----BEGIN PUBLIC KEY-----\nMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAkNpIIAUl+ZWF4s4LEKGy\nWQq0jCNlUHopCojBcQzebphxEVgTgOlqdxQblV3ttTjTHSf2CZdPEBRfnYz97hiZ\nEmsWvdL7rzuvztzFgqXJMcswbSWu+h2ZuAyu23ZCNZPi7/cqPtyCcocyaA14mbo8\nGBpUMevmVYu928yQx20D3lfKNko+9MDz8uDm/Bplk4La8tYwhPg5IWl7Bpj7I6KI\nWb3h7V3WURXp4JjTWgHn3eD1pRZAThxkFdj0+rzK3h4sDa2EqXLK30UNgoQSuyG3\nsvV4TkDaNjwDF0+ltLZAYRLqdYxzPaZu3XMkL4j60T32tExLYnkhBjlQARj/18Gj\n2kP2FalyjnVDW5MpIgjNPd5m3TlfLqcygV29Ef0CGygSIohl6WRTCLGdupDn8UnK\n9IjpUOyIw75dPqrdfRY1nFOnM6qfKd80f0LFZMAwh/K+lyvdo+/NnfxcBwgOSYwV\nmzX7R1bMSXqm7d57M0kR1ORdjWc2zf+BDDc8DuNKmCA/EfZ8HSjAwLgRyfTNHYHF\nDiui8JxbbRUgBrlnLr63HSjZBg71OErCAhSHRAQjhUeCZc+jSjEv1fReY9Y31tYV\nHLy8H0tu98ktvMoz3ZjSFmZRaNCXPiOXxp7KkynjNSwnbt/dbRNAz1leQZpERD2e\nlQZShIw3hQZNlT9gW0J4FjkCAwEAAQ==\n-----END PUBLIC KEY-----\n
+      - SMTP_SERVER=smtp.gmail.com
+      - SMTP_PORT=587
+      - SMTP_USERNAME=
+      - SMTP_PASSWORD=
+      - SMTP_SSL=false
+      - SMTP_TLS_VERIFY=false
+      - CORE_SERVICE_HTTP=http://core:3000
+      - DISCORD_APP_ID=
+      - DISCORD_PUBLIC_KEY=
+      - DISCORD_BOT_TOKEN=
 
 volumes:
   workplanner-data:
     driver: local
-  node_modules_cache:
-    driver: local
+
+networks:
+  default:
+    driver: bridge
