@@ -1,0 +1,11 @@
+{
+  "scripts": {
+    "comms:setup": "cd comms && mix deps.get && mix compile",
+    "comms:test": "cd comms && mix test",
+    "comms:mix-tasks": "cd comms && mix help",
+    "rsa:key-gen": "ssh-keygen -t rsa -b 4096 -m PEM -f private.key",
+    "rsa:pub-key-gen": "ssh-keygen -f private.key -e -m PKCS8 > public.key",
+    "docker:push": "docker push wingsmc/work-planner-core:latest && docker push wingsmc/work-planner-migrator:latest && docker push wingsmc/work-planner-reporting:latest && docker push wingsmc/work-planner-comms:latest",
+    "ngrok:publish": "ngrok http 4000"
+  }
+}
