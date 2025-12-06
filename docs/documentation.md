@@ -2,29 +2,30 @@
 
 # Szoftverarchitektúrák házi feladat dokumentáció<br>Céges munkaidő napló
 
+</center>
+
+<br>
+
+<img src="../core-app/public/logo-light.png" alt="Logo" style="display: block;
+    margin: 0 auto;
+    max-width: 100%;" />
+
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
 <br>
 <br>
 <br>
 
-![logo](../core-app/public/logo-light.png)
-
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-
-|                  |        |
+| Név              | Neptun |
 | ---------------- | ------ |
 | Farkas Fanni     | EU7XYP |
 | Bertók Dániel    | H01HRM |
 | Dremák Gergely   | KSHSLY |
 | Forrás Máté Ákos | ONQ3KU |
-
-</center>
-
----
 
 - [Szoftverarchitektúrák házi feladat dokumentációCéges munkaidő napló](#szoftverarchitektúrák-házi-feladat-dokumentációcéges-munkaidő-napló)
   - [Rendszer célja és környezete](#rendszer-célja-és-környezete)
